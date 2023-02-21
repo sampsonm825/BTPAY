@@ -1,0 +1,237 @@
+{% extends "admin_base.html" %}
+
+{% block title %}後台管理-產品{% endblock %}
+
+{% block style %}
+<style>
+  * {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  button {
+    background: none;
+    border: 0;
+    color: inherit;
+    /* cursor: default; */
+    font: inherit;
+    line-height: normal;
+    overflow: visible;
+    padding: 0;
+    -webkit-appearance: button;
+    /* for input */
+    -webkit-user-select: none;
+    /* for button */
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  button::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+  }
+
+  .product {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px 30px;
+  }
+
+  h1,
+  h2 {
+    text-align: center;
+    font-size: 32px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    margin-bottom: 30px;
+  }
+
+  h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #000;
+  }
+
+  td,
+  th {
+    border: 1px solid #000;
+    padding: 4px;
+    text-align: center;
+  }
+
+  a {
+    text-decoration: none;
+    display: block;
+    width: 20%;
+    color: #fff;
+    background-color: rgb(117, 117, 198);
+    padding: 6px 10px;
+    text-align: center;
+    margin-right: 0;
+    margin-left: auto;
+    margin-bottom: 30px;
+  }
+
+  .add-modal {
+    position: absolute;
+    width: 40%;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 15px;
+    background-color: #fff;
+    border: 2px solid #000;
+    z-index: 99;
+  }
+
+
+  form {
+    width: 80%;
+    margin: 0 auto;
+    padding: 10px;
+  }
+
+  .form-control {
+    margin-bottom: 15px;
+  }
+
+  .form-control input {
+    width: 100%;
+    padding: 8px 10px;
+  }
+
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  button {
+    padding: 4px 6px;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  button.close {
+    background-color: rgb(141, 33, 33);
+  }
+
+  button[type="submit"] {
+    background-color: rgb(60, 60, 122);
+  }
+
+  td a {
+    display: block;
+    margin: 0 auto;
+    width: 50%;
+  }
+
+  td a:first-child {
+    margin-bottom: 10px;
+  }
+
+  td a:last-child {
+    background-color: rgb(171, 83, 111);
+  }
+
+  td:last-child {
+    padding: 15px 0;
+  }
+</style>
+{% endblock %}
+
+{% block main %}
+<div id="app">
+  <div class="product">
+    <h1>產品列表</h1>
+    <a @click="modalControl(true, '新增'), tempProduct = {}" class="open" href="javascript:;">新增產品</a>
+    <table>
+      <thead>
+        <tr>
+          <th>名稱</th>
+          <th>敘述</th>
+          <th>價格</th>
+          <th>廠商</th>
+          <th>廠商帳戶</th>
+          <th>功能</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(item, index) in product_data" :key="item._id">
+          <td>[[ item.name ]]</td>
+          <td>[[ item.desc ]]</td>
+          <td>[[ item.price ]]</td>
+          <td>[[ item.factory_name ]]</td>
+          <td>[[ item.factory_bank ]]</td>
+          <td>
+            <a @click="tempProduct = {...item}, modalControl(true, '編輯')" href="javascript:;">編輯</a>
+            <a :href="`/admin_product?methods=delete&id=${[[item._id]]}`">刪除</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div v-show="is_modal" class="add-modal">
+    <h2>[[ modal_title ]]產品</h2>
+    <form action="/admin_product" method="POST">
+      <div class="form-control">
+        <input type="text" name="name" placeholder="產品名稱" v-model="tempProduct.name">
+      </div>
+      <div class="form-control">
+        <input type="number" name="price" min="0" placeholder="產品價格" v-model="tempProduct.price">
+      </div>
+      <div class="form-control">
+        <input type="text" name="factory_name" placeholder="廠商名稱" v-model="tempProduct.factory_name">
+      </div>
+      <div class="form-control">
+        <input type="text" name="factory_bank" placeholder="廠商帳戶" v-model="tempProduct.factory_bank">
+      </div>
+      <div class="form-control">
+        <input type="text" name="desc" placeholder="產品敘述" v-model="tempProduct.desc">
+      </div>
+      <div class="form-control">
+        <input type="text" name="potp" placeholder="Google OTP">
+      </div>
+      <div class="button-group">
+        <input type="hidden" name="id" v-model="tempProduct._id">
+        <button @click="modalControl(false), tempProduct = {}" type="button" class="close">取消</button>
+        <button type="submit">[[ modal_title ]]</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script src="https://unpkg.com/vue@next"></script>
+<script>
+  const app = Vue.createApp({
+    data() {
+      return {
+        product_data: '',
+        is_modal: false,
+        tempProduct: {},
+        modal_title: ''
+      }
+    },
+    compilerOptions: {
+      delimiters: ["[[", "]]"]
+    },
+    methods: {
+      modalControl(type, fun) {
+        type ? this.is_modal = true : this.is_modal = false
+        this.modal_title = fun
+      }
+    },
+    created() {
+      let tempProduct = '{{ product_data }}'
+      this.product_data = JSON.parse(tempProduct.replace(/&#39;/g, '"'))
+    }
+  })
+  app.mount('#app')
+</script>
+{% endblock %}

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>會員資料</title>
+  <style>
+    button {
+      background: none;
+      border: 0;
+      color: inherit;
+      /* cursor: default; */
+      font: inherit;
+      line-height: normal;
+      overflow: visible;
+      padding: 0;
+      -webkit-appearance: button;
+      /* for input */
+      -webkit-user-select: none;
+      /* for button */
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+
+    button::-moz-focus-inner {
+      border: 0;
+      padding: 0;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: bold;
+      text-align: center;
+      padding: 30px 0;
+      letter-spacing: 3px;
+    }
+
+    .profile {
+      width: 400px;
+      margin: 0 auto;
+      margin-top: 30px;
+      background-color: #fff;
+      box-shadow: 0 0 8px 0 rgb(0, 0, 0, 6%), 0 1px 0 0 rgb(0, 0, 0, 2%);
+      border: 1px solid rgba(54, 64, 74, .1);
+      padding: 20px 60px;
+    }
+
+    .profile-title {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .profile-title .img {
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      overflow: hidden;
+      border: 2px solid rgba(0, 0, 0, .3);
+    }
+
+    .profile-title img {
+      width: 100%;
+      object-fit: cover;
+      height: 60px;
+    }
+
+    .profile-title .coin {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logout, .cart {
+      display: flex;
+    }
+    .logout a, .cart a {
+      text-decoration: none;
+      color: #fff;
+      background-color: #5d9cec;
+      border: 1px solid #5d9cec;
+      text-align: center;
+      font-size: 20px;
+      font-weight: 600;
+      border-radius: 2rem;
+      width: 30%;
+      padding: 6px 20px;
+      cursor: pointer;
+      margin-bottom: 16px;
+      margin-right: 0;
+      margin-left: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>會員資料</h1>
+  <div class="profile">
+    <div class="profile-title">
+      <div class="img">
+        <img src="{{ member_data.img }}" alt="">
+      </div>
+      <div class="name">
+        <p>ID: {{ member_data.id }}</p>
+        <p>暱稱: {{ member_data.name }}</p>
+      </div>
+    </div>
+    <div class="coin">
+      <p>剩餘代幣: {{ member_data.coin }}</p>
+    </div>
+    <div class="logout">
+      <a href="#">登出</a>
+    </div>
+    <div class="cart">
+      <a href="/order">历史订单</a>
+    </div>
+    <div class="cart">
+      <a href="/cart/all">前往購物</a>
+    </div>
+    <div class="cart">
+      <a href="/resetPassword">修改密码</a>
+    </div>
+  </div>
+  <script>
+    document.querySelector('.logout a').addEventListener('click', (e) => {
+      e.preventDefault()
+      localStorage.removeItem('cart_list')
+      location.href = '/logout'
+    })
+  </script>
+</body>
+
+</html>

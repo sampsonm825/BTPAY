@@ -1,0 +1,193 @@
+{% extends "admin_base.html" %}
+
+{% block title %}後台-會員管理{% endblock %}
+
+{% block style %}
+<style>
+  * {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  h1 {
+    font-weight: bold;
+    font-size: 32px;
+    text-align: center;
+    letter-spacing: 3px;
+    margin: 30px 0;
+  }
+  .verify {
+    margin-top: 30px;
+    padding: 0 30px;
+  }
+  a {
+    width: 20%;
+  }
+  table {
+    width: 100%;
+    padding: 0 60px;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: 1px solid #000;
+    margin: 0 auto;
+  }
+
+  th,
+  td {
+    border: 1px solid #000;
+    width: calc(100% / 9);
+    padding: 8px;
+    text-align: center;
+  }
+
+  table img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  a {
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    padding: 6px 0;
+  }
+  .edit-modal {
+    position: absolute;
+    width: 40%;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 15px;
+    background-color: #fff;
+    border: 2px solid #000;
+    opacity: 1;
+    z-index: 99;
+  }
+  form {
+    width: 80%;
+    margin: 0 auto;
+    padding: 10px;
+  }
+
+  .form-control {
+    margin-bottom: 15px;
+  }
+
+  .form-control input {
+    width: 100%;
+    padding: 8px 10px;
+  }
+
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  button {
+    padding: 4px 6px;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+  }
+  button.close {
+    background-color: rgb(141, 33, 33);
+  }
+  button[type="submit"] {
+    background-color: rgb(60, 60, 122);
+  }
+  h2 {
+    text-align: center;
+  }
+</style>
+{% endblock %}
+
+{% block main %}
+<div id="app">
+  <h1>會員管理</h1>
+  <div class="verify">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>帳號</th>
+          <th>姓名</th>
+          <th>身分證字號</th>
+          <th>戶頭帳號</th>
+          <th>代幣數量</th>
+          <th>功能</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(item, index) in member_data" :key="item._id">
+          <td>[[ index + 1 ]]</td>
+          <td>[[ item.account ]]</td>
+          <td>[[ item.name ]]</td>
+          <td>[[ item.IDcard ]]</td>
+          <td>[[ item.bankAccount ]]</td>
+          <td>[[ item.coin ]]</td>
+          <td>
+            <a @click="this.tempMember = { ...item }, modalControl(true)" href="javascript:;">編輯</a>
+            <a :href="`/admin_member?methods=delete&id=${[[ item._id ]]}`">刪除</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div v-show="is_modal" class="edit-modal">
+    <h2>會員編輯</h2>
+    <form action="/admin_member" method="POST">
+      <div class="form-control">
+        <input type="text" name="name" v-model="tempMember.name">
+      </div>
+      <div class="form-control">
+        <input type="text" name="account" v-model="tempMember.account" readonly>
+      </div>
+      <div class="form-control">
+        <input type="text" name="IDcard" v-model="tempMember.IDcard" readonly>
+      </div>
+      <div class="form-control">
+        <input type="text" name="bankAccount" v-model="tempMember.bankAccount">
+      </div>
+      <div class="form-control">
+        <input type="number" name="coin" v-model="tempMember.coin">
+      </div>
+      <div class="button-group">
+        <input type="hidden" name="id" v-model="tempMember._id">
+        <button @click="modalControl(false), this.tempMember = {}" type="button" class="close">取消</button>
+        <button type="submit">修改</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<script src="https://unpkg.com/vue@next"></script>
+<script>
+  const app = Vue.createApp({
+    data () {
+      return {
+        member_data: '',
+        is_modal: false,
+        tempMember: {}
+      }
+    },
+    compilerOptions: {
+      delimiters: ["[[", "]]"]
+    },
+    methods: {
+      modalControl (type) {
+        type ? this.is_modal = true : this.is_modal = false
+      }
+    },
+    created () {
+      let tempMember = '{{ member_data }}'
+      this.member_data = JSON.parse(tempMember.replace(/&#39;/g, '"'))
+    }
+  })
+  app.mount('#app')
+</script>
+{% endblock %}

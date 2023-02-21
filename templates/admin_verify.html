@@ -1,0 +1,103 @@
+{% extends "admin_base.html" %}
+
+{% block title %}後台-會員身份驗證{% endblock %}
+
+{% block style %}
+<style>
+  * {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  h1 {
+    font-weight: bold;
+    font-size: 32px;
+    text-align: center;
+    letter-spacing: 3px;
+    margin: 30px 0;
+  }
+  .verify {
+    padding: 0 30px;
+  }
+  a {
+    width: 20%;
+  }
+  table {
+    width: 100%;
+    padding: 0 60px;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: 1px solid #000;
+    margin: 0 auto;
+  }
+
+  th,
+  td {
+    border: 1px solid #000;
+    width: calc(100% / 9);
+    padding: 8px;
+    text-align: center;
+  }
+
+  table img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  a {
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    padding: 6px 0;
+  }
+</style>
+{% endblock %}
+
+{% block main %}
+<h1>身份驗證</h1>
+<div class="verify">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>帳號</th>
+        <th>姓名</th>
+        <th>身分證字號</th>
+        <th>戶頭帳號</th>
+        <th>身分證圖片</th>
+        <th>戶頭圖片</th>
+        <th>金融卡圖片</th>
+        <th>功能</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in member_data %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ item.account }}</td>
+        <td>{{ item.name}}</td>
+        <td>{{ item.IDcard }}</td>
+        <td>{{ item.bankAccount }}</td>
+        <td>
+          <img src="{{ item.img_arr[0] }}">
+        </td>
+        <td>
+          <img src="{{ item.img_arr[1] }}">
+        </td>
+        <td>
+          <img src="{{ item.img_arr[2] }}">
+        </td>
+        <td>
+          <a href="/admin_verify?id={{ item._id }}&is_verify=1">驗證成功</a>
+          <a href="/admin_verify?id={{ item._id }}&is_verify=2">驗證失敗</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>訂單確認</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+    .wrap {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: bold;
+      text-align: center;
+      padding: 30px 0;
+    }
+    h2 {
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px 0;
+    }
+    .order_info {
+      width: 35%;
+      margin: 0 auto;
+      border: 1px solid #000;
+    }
+    .order_info p {
+      display: flex;
+      width: 60%;
+      justify-content: space-between;
+      padding: 10px 0;
+      margin: 0 auto;
+    }
+    a {
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      margin: 0 auto;
+      width: 30%;
+      padding: 10px 0 10px 0;
+      background-color: rgb(72, 72, 141);
+      color: #fff;
+      margin-bottom: 15px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>訂單內容</h1>
+    <div class="order_info">
+      <h2>訂單資訊</h2>
+      <p>
+        <span>訂購人:</span>
+        <span>{{ member_data.name }}</span>
+      </p>
+      <p>
+        <span>購買物:</span>
+        <span>{{ product_data.name }}</span>
+      </p>
+      <p>
+        <span>價格:</span>
+        <span>{{ product_data.price }} 代幣</span>
+      </p>
+      <p>
+        <span>公司名稱:</span>
+        <span>{{ product_data.factory_name }}</span>
+      </p>
+      <p>
+        <span>匯款帳號:</span>
+        <span>{{ product_data.factory_bank }}</span>
+      </p>
+      <a href="/cart/{{ product_data._id }}?methods=buy&mid={{ member_data._id }}">確認訂單</a>
+    </div>
+  </div>
+</body>
+</html>

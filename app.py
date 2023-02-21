@@ -1,0 +1,622 @@
+from flask import Flask, render_template, redirect, url_for, session, request, jsonify
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+from datetime import timedelta, timezone, datetime
+import os
+import pyotp
+import qrcode
+import hashlib
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+UPLOAD_FOLDER = basedir+'\public\image'
+ALLOWED_EXTENSIONS = {'png','jpg','jpeg'}
+
+app = Flask(
+    __name__,
+    static_folder='public',
+    static_url_path='/'
+)  # 建立 application 物件
+
+
+app.secret_key = os.urandom(24)
+app.permanent_session_lifetime = timedelta(minutes=60)
+app.config['SECRET_KEY'] = os.urandom(24)
+
+
+
+
+
+
+
+connection_string='mongodb+srv://samsonm825:g4zo1j6y94@cluster0.ow4o5g4.mongodb.net/?retryWrites=true&w=majority'
+client = MongoClient(connection_string)
+dbs = client.BT
+
+key = 'iLufaMySuperSecretKey'
+
+def verify_potp(potp):
+    totp = pyotp.TOTP(key)
+    result = totp.verify(potp)
+    return result
+
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.',1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+
+
+@app.route('/', methods=['GET','PSOT'])
+def index():
+    return render_template('index.html')
+
+@app.route('/resetPassword',methods=['GET','POST'])
+def resetPassword():
+    if 'id' in session:
+        if request.method == 'POST':
+            old_password = request.form['oldPassword']
+            password = request.form['password']
+            repeat_password = request.form['repeatPassword']
+            member_data = dbs.member.find_one({'_id':ObjectId(session['id']) })
+            old_password_str = old_password + member_data['salt']
+            old_password = hashlib.sha1(old_password_str.encode('utf-8'))
+
+            if member_data['password'] == old_password.hexdigest() and password ==repeat_password:
+                password_str = password + member_data['salt']
+                user_password = hashlib.sha1(password_str.encode('utf-8'))
+                dbs.member.update_one(
+                    {
+                     '_id':ObjectId(session['id'])
+                    },
+                    {
+                     '$set':{
+                        'password': user_password.hexdigest()
+                     }
+                    }
+                )
+                session.clear()
+                return redirect('login')
+            
+            else:
+                return redirect('resetPassword')
+        else:
+            
+            return render_template('resetPassword.html')
+    else:
+        return redirect('login')
+
+@app.route('/cart/<product>')
+def cart(product):
+    if 'id' in session:
+        member_data = dbs.member.find_one({'_id':ObjectId(session['id'])})
+
+        if product == 'all':
+            product_data = []
+            product_find = dbs.product.find(
+                {
+                    'is_buy':False,
+                    'price':{
+                        '$lte':member_data['coin']
+                    }
+                }
+            )
+            for doc in product_find:
+                product_data.append(doc)
+
+            return render_template('cart.html',product_data = product_data)
+        else:
+            product_data = dbs.product.find_one({'_id':ObjectId(product)})
+            if request.args.get('methods') == 'buy':
+                if request.args.get('mid')!= session['id']:
+                    session.clear()
+                    return redirect(url_for('login'))
+                dbs.member.update_one(
+                {
+                    '_id':ObjectId(request.args.get('mid'))
+                },             
+                
+                {
+                    '$set':{ 
+                        'coin':member_data['coin']-product_data['price']
+                    }
+
+                })
+                dbs.product.update_one(
+                {
+                    '_id':ObjectId(product)
+                },             
+                
+                {
+                    '$set':{ 
+                        'is_buy':True
+                    }
+
+                })
+                dbs.order.insert_one(
+                    {
+                        'product_id':ObjectId(product),
+                        'mid':ObjectId(request.args.get('mid')), 
+                        'is_paid':False   
+                    }
+                )
+
+                return redirect(url_for('cart',product = 'all'))
+            else:
+                return render_template('cart_order.html',product_data=product_data,member_data=member_data)
+
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/admin_user', methods=['GET', 'POST'] )
+def admin_user():
+    if 'display_name' in session and session['display_name'] == '最高管理者':
+        if request.method == 'POST':
+            name = request.form['name']
+            account = request.form['account']
+            id = request.form['id']
+            password = request.form['password']
+            display_name = request.form['display_name']
+
+            if id == '':
+                user_data = dbs.admin.find_one({'account':account})
+                if user_data != None:
+                    return redirect('admin_user')
+                salt = 'KKJNWSDJIJDJIWWIDJ'
+                password_str = password + salt
+                user_password = hashlib.sha1(password_str.encode('utf-8'))
+                dbs.admin.insert_one({
+                    'name': name,
+                    'account':account,
+                    'password':user_password.hexdigest(),
+                    'salt':salt,
+                    'display_name':display_name
+                })
+                return redirect('admin_user')
+            else:
+                user_data = dbs.admin.find_one({'_id':ObjectId(id)})
+                if user_data['password'] != password:
+                    password_str = password + user_data['salt']
+                    user_password = hashlib.sha1(password_str.encode('utf-8'))
+                    password = user_password.hexdigest()
+                dbs.admin.update_one(
+                    {
+                      '_id':ObjectId(id)
+                    },
+                    {
+                      '$set':{
+                      'name': name,
+                      'password':password,
+                      'display_name':display_name
+
+                      }
+                    })
+                return redirect('admin_user')
+        else:
+            if request.args.get('methods') == 'delete':
+                dbs.admin.delete_one({"_id":ObjectId(request.args.get('id'))})
+            user_data = []
+            user_find = dbs.admin.find()
+            for doc in user_find:
+                doc['_id'] = str(doc['_id'])
+                user_data.append(doc)
+            return render_template('admin_user.html', user_data=user_data) 
+    else:
+        return redirect('admin_dashboard')
+
+@app.route('/admin_order')
+def admin_order():
+    if 'display_name' and session['display_name'] == '最高管理者':
+        if request.args.get('methods') == 'post':
+            order_data = dbs.order.find_one(
+                {
+                  '_id':ObjectId(request.args.get('oid'))
+                }
+            )
+            if order_data == None:
+                session.clear()
+                return redirect('admin_login')
+            
+            dbs.order.update_one(
+                {
+                  '_id':ObjectId(request.args.get('oid'))
+                },
+                {
+                  '$set':{
+                     'is_paid':True
+                  }
+                }
+            )
+        elif request.args.get('methods') == 'delete':
+            order_data = dbs.order.find_one(
+                {
+                  '_id':ObjectId(request.args.get('oid'))
+                }
+            )
+            if order_data == None:
+                session.clear()
+                return redirect('admin_login')
+            dbs.order.delete_one(
+                {
+                  '_id':ObjectId(request.args.get('oid'))
+                }
+            )
+
+        order_data = []
+        order_find = dbs.order.aggregate([
+            {
+                '$lookup':{
+                    'from':'product',
+                    'localField':'product_id',
+                    'foreignField':'_id',
+                    'as':'product'
+                    }
+            },
+             {
+                '$lookup':{
+                    'from':'member',
+                    'localField':'mid',
+                    'foreignField':'_id',
+                    'as':'member'
+                    }
+            },
+
+        ])
+        for doc in order_find:
+            order_data.append(doc)
+
+        return render_template('admin_order.html',order_data=order_data)
+    else:
+        return redirect('admin_login')
+
+
+@app.route('/admin_verify', methods=['GET','PSOT'])
+def admin_verify():
+    if 'display_name' and session['display_name'] == '最高管理者':
+        if request.args.get('id'):
+            if request.args.get('is_verify') == '1':
+                dbs.member.update_one(
+                    {
+                        '_id':ObjectId( request.args.get('id'))
+                    },
+                    {
+                        '$set':{
+                            'is_verify':1
+                        }
+                    }
+                )
+            else:
+                dbs.member.update_one(
+                    {
+                        '_id':ObjectId( request.args.get('id'))
+                    },
+                    {
+                        '$set':{
+                            'is_verify':2
+                        }
+                    }
+                )
+
+            
+            
+            return redirect('admin_verify')
+
+        member_data = []
+        member_find = dbs.member.find({
+        'is_verify':0
+        })
+
+
+        for doc in member_find:
+            member_data.append(doc)
+
+        return render_template('admin_verify.html', member_data = member_data)
+
+    else:
+        return redirect('admin_login')
+@app.route('/admin_member',methods=['POST','GET'])
+def admin_member():
+    if 'display_name' and session['display_name'] == '最高管理者':
+        if request.method == 'POST':
+            name = request.form['name']
+            coin = int(request.form['coin'])
+            id = request.form['id']
+            bankAccount = request.form['bankAccount']
+
+            dbs.member.update_one(
+                {
+                    '_id':ObjectId(id)
+                },
+                {
+                    '$set':{
+                        'name':name,
+                        'coin':coin,
+                        'bankAccount':bankAccount
+                    }
+                }
+            )
+            return redirect('admin_member')
+
+
+        else:
+            if request.args.get('methods') =='delete':
+                dbs.member.delete_one(
+                    {
+                        '_id':ObjectId(request.args.get('id'))
+                    }
+                )
+            
+            member_data = []
+            member_find = dbs.member.find(
+                {
+                    'is_verify':1
+                }
+            )
+            for doc in member_find:
+                doc['_id'] = str(doc['_id'])
+                member_data.append(doc)
+            
+            return render_template("admin_member.html" ,member_data=member_data)
+    else:
+        return redirect('admin_login')
+@app.route('/admin_dashboard')
+def admin_dashboard():
+    if 'display_name' in session:
+        return render_template('admin_dashboard.html')
+    else:
+        return redirect('admin_login')
+
+@app.route('/order')
+def order():
+    if 'id' in session:
+        order_data = []
+        order_find = dbs.order.aggregate([
+            {
+                '$match':{
+                    'mid':ObjectId(session['id'])
+                }
+            },
+            {
+                '$lookup':{
+                    'from':'product',
+                    'localField':'product_id',
+                    'foreignField':'_id',
+                    'as':'product'
+                    }
+            }
+        ])
+
+        for doc in order_find:
+            order_data.append(doc)
+        return render_template('order.html',order_data=order_data)
+    else:
+        return redirect('login')
+
+
+
+@app.route('/admin_login', methods=['GET','POST'])
+def admin_login():
+    if request.method == 'POST':
+        admin_data=[]
+        account = request.form['account']
+        password = request.form['password']
+        potp = request.form['potp']
+
+        pottp_resul = verify_potp(potp)
+
+        admin_find = dbs.admin.find({
+            'account': account
+        })
+        for doc in admin_find:
+             admin_data.append(doc)
+        if len(admin_data) <= 0:
+            return redirect('admin_login')
+        password_str = password + admin_data[0]['salt']
+        user_password = hashlib.sha1(password_str.encode('utf-8'))
+
+
+        if admin_data[0]['password'] == user_password.hexdigest():
+            session.permanent = True
+            session['display_name'] = admin_data[0]['display_name']
+            session['id'] = str(admin_data[0]['_id'])
+            return redirect('admin_dashboard')
+        else:
+            return redirect('admin_login')            
+    else:
+        if 'display_name' in session:
+            return redirect ('admin_dashboard')
+        return render_template('admin_login.html')
+
+@app.route('/admin_logout')
+def admin_logout():
+  session.clear()
+  return redirect('admin_login')
+
+
+@app.route('/login', methods=['GET','POST'])
+def login():
+    if request.method == 'POST':
+        member_data = []
+        account = request.form["account"]
+        password = request.form["password"]
+
+        member_find = dbs.member.find({
+            'account':account
+        })
+
+        for doc in member_find:
+            member_data.append(doc)
+        
+        if len(member_data) <= 0:
+            return redirect('login')
+        
+        password_str = password + member_data[0]['salt']
+        user_password = hashlib.sha1(password_str.encode('utf-8'))
+
+
+
+        if member_data[0]['password'] == user_password.hexdigest() and member_data[0]['is_verify'] == 1 :
+            session.permanent = True
+            session['name'] = member_data[0]['name']
+            session['id'] = str(member_data[0]['_id'])
+            
+            return redirect('profile')
+        else:
+            return redirect('login')
+
+    else:
+        if 'id' in session:
+          return  redirect('profile')
+        return render_template('login.html')
+
+@app.route('/admin_product',methods=['GET','POST'])
+def admin_product():
+    if 'display_name' in session:
+        if request.method=='POST':
+            potp = request.form['potp']
+            potp_result = verify_potp(potp)
+            potp_result = True
+            if potp_result == True:
+                name = request.form['name']
+                price = int(request.form['price'])
+                desc = request.form['desc']
+                factory_name = request.form['factory_name']
+                factory_bank = request.form['factory_bank']
+
+                if request.form['id'] == '':
+                    dbs.product.insert_one(
+                        {
+                            'name':name,
+                            'price':price,
+                            'desc':desc,
+                            'factory_name':factory_name,
+                            'factory_bank':factory_bank,
+                            'is_buy':False
+                        }
+                    )
+                else:
+                     dbs.product.update_one(
+                        {
+                            '_id': ObjectId(request.form['id'])
+                        },
+                        {
+                            '$set':{
+                                'name':name,
+                                'price':price,
+                                'desc':desc,
+                                'factory_name':factory_name,
+                                'factory_bank':factory_bank
+                            }
+                        }
+                    )
+
+                return redirect('admin_product')
+            else:
+                return redirect('admin_product')
+        else:
+            if request.args.get('methods') == 'delete':
+                dbs.product.delete_one(
+                    {
+                         '_id':ObjectId( request.args.get('id'))
+                    }
+                )
+            product_data = []
+            product_find = dbs.product.find()
+            for doc in product_find:
+                doc['_id'] = str(doc['_id'])
+                if doc['is_buy'] == True:
+                    doc['is_buy'] = 1
+                else:
+                    doc['is_buy'] = 0
+                product_data.append(doc) 
+            return render_template('admin_product.html',product_data = product_data)
+    else:
+        return redirect('admin_login')
+
+@app.route('/profile', methods=['GET','POST'])
+def profile():
+    if 'id' in session:
+        member_data = {}
+        member_find = dbs.member.find({
+            '_id':ObjectId(session['id'])
+        })
+        for doc in member_find:
+            member_data['name'] = doc['name']
+            member_data['id'] = str(doc['_id'])
+            member_data['img_arr'] = doc['img_arr'][0]
+            member_data['coin'] = doc['coin']
+
+
+                
+            
+           
+
+    else :
+        return redirect('login')
+    return render_template('profile.html',member_data=member_data)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('login')
+
+@app.route('/register', methods=['GET','POST'])
+def register():
+    if request.method == 'POST':
+        account = request.form['account']
+        password = request.form['password']
+        name = request.form['name']
+        resetPassword = request.form['resetPassword']
+        IDcard = request.form['IDcard']
+        bankName = request.form['bankName']
+        bankAccount = request.form['bankAccount']
+
+        account_repeat = dbs.member.find_one({'account':account})
+        if account_repeat != None:
+            return redirect('register')
+
+        print(account, password,   name, resetPassword, IDcard, bankName, bankAccount)
+
+        file_arr = []
+        img_arr = []
+        imgUrl = ''
+        file_arr.append(request.files['IDcardImage'])
+        file_arr.append(request.files['bankImage'])
+        file_arr.append(request.files['creditImage'])
+
+        for f in file_arr:
+            print('step2')
+            if f and allowed_file(f.filename):
+                file_path = basedir + '\public\image' + f'\{account}'
+                print(file_path)
+                if not os.path.isdir(file_path):
+                    os.mkdir(file_path)
+                f.save(os.path.join(file_path, f.filename))
+                imgUrl = f'/image/{account}/{f.filename}'
+                img_arr.append(imgUrl)
+            else:
+                print('step3')
+                return redirect('register')
+        
+        salt = '645464'
+        password_str = password + salt
+        user_password = hashlib.sha1(password_str.encode('utf-8'))
+
+        dbs.member.insert_one({
+            'account': account,
+            'password': user_password.hexdigest(),
+            'name':  name,
+            'IDcard': IDcard,
+            'bankName': bankName,
+            'bankAccount': bankAccount,
+            'coin':0,
+            'img_arr': img_arr,
+            'is_verify': 0,
+            'salt':salt
+        })
+
+
+        return '注册成功'
+    else:
+        return render_template('register.html')
+app.run(debug=True)
+

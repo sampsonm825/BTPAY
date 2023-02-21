@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>後台管理-登入</title>
+</head>
+<style>
+  * {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  button {
+    background: none;
+    border: 0;
+    color: inherit;
+    /* cursor: default; */
+    font: inherit;
+    line-height: normal;
+    overflow: visible;
+    padding: 0;
+    -webkit-appearance: button;
+    /* for input */
+    -webkit-user-select: none;
+    /* for button */
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  button::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: rgba(0, 0, 0, 3%);
+  }
+
+  h1 {
+    font-weight: bold;
+    font-size: 32px;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .admin-login {
+    display: flex;
+    justify-content: center;
+    height: calc(100vh - 105px);
+  }
+
+  form {
+    width: 400px;
+    margin: 5% auto;
+  }
+
+  .wrapper {
+    background-color: #fff;
+    padding: 20px 60px;
+    box-shadow: 0 0 8px 0 rgb(0, 0, 0, 6%), 0 1px 0 0 rgb(0, 0, 0, 2%);
+    border: 1px solid rgba(54, 64, 74, .1)
+  }
+
+  .form-control {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .form-control input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid rgba(0, 0, 0, 25%);
+    border-radius: 4px;
+    font-size: 24px;
+  }
+
+  .button-group {
+    display: flex;
+  }
+
+  .button-group button {
+    color: #fff;
+    background-color: #5d9cec;
+    border: 1px solid #5d9cec;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    border-radius: 2rem;
+    width: 100%;
+    padding: 6px 20px;
+    cursor: pointer;
+  }
+</style>
+
+<body>
+  <div class="admin-login">
+    <form action="/admin_login" method="post">
+      <div class="wrapper">
+        <h1>管理者後台-登入</h1>
+        <div class="form-control">
+          <input type="text" name="account" id="account" placeholder="帳號">
+        </div>
+        <div class="form-control">
+          <input type="password" name="password" id="password" placeholder="密碼">
+        </div>
+        <div class="form-control">
+          <input type="text" name="potp" id="potp" placeholder="Google OTP">
+        </div>
+        <div class="button-group">
+          <button type="submit">登入</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</body>
+
+</html>

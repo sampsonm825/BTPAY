@@ -1,0 +1,162 @@
+{% extends "admin_base.html" %}
+
+{% block title %}後台-訂單管理{% endblock %}
+
+{% block style %}
+<style>
+  * {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  h1 {
+    font-weight: bold;
+    font-size: 32px;
+    text-align: center;
+    letter-spacing: 3px;
+    margin: 30px 0;
+  }
+
+  .verify {
+    margin-top: 30px;
+    padding: 0 30px;
+  }
+
+  a {
+    width: 20%;
+  }
+
+  table {
+    width: 100%;
+    padding: 0 60px;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: 1px solid #000;
+    margin: 0 auto;
+  }
+
+  th,
+  td {
+    border: 1px solid #000;
+    width: calc(100% / 9);
+    padding: 8px;
+    text-align: center;
+  }
+
+  table img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  a {
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    padding: 6px 0;
+  }
+
+  .edit-modal {
+    position: absolute;
+    width: 40%;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 15px;
+    background-color: #fff;
+    border: 2px solid #000;
+    opacity: 1;
+    z-index: 99;
+  }
+
+  form {
+    width: 80%;
+    margin: 0 auto;
+    padding: 10px;
+  }
+
+  .form-control {
+    margin-bottom: 15px;
+  }
+
+  .form-control input {
+    width: 100%;
+    padding: 8px 10px;
+  }
+
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  button {
+    padding: 4px 6px;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  button.close {
+    background-color: rgb(141, 33, 33);
+  }
+
+  button[type="submit"] {
+    background-color: rgb(60, 60, 122);
+  }
+
+  h2 {
+    text-align: center;
+  }
+  .is_paid{
+    color:green
+  }
+  .no_paid{
+    color:red
+  }
+</style>
+{% endblock %}
+
+{% block main %}
+<h1>訂單管理</h1>
+<div class="verify">
+  <table>
+    <thead>
+      <tr>
+        <th>訂購人</th>
+        <th>訂購人帳戶</th>
+        <th>產品</th>
+        <th>產品公司</th>
+        <th>公司帳戶</th>
+        <th>狀態</th>
+        <th>功能</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in order_data %}
+      <tr>
+        <td>{{ item.member[0].name }}</td>
+        <td>{{ item.member[0].bankAccount }}</td>
+        <td>{{ item.product[0].name }}</td>
+        <td>{{ item.product[0].factory_name }}</td>
+        <td>{{ item.product[0].factory_bank }}</td>
+
+        <td>
+          {% if item.is_paid == true %}
+            <span class='is_paid'>已付款</span>
+          {% else %}
+            <span class='no_paid'>未付款</span>
+          {% endif %}
+        </td>
+        <td>
+          <a href="/admin_order?methods=post&oid={{ item._id }}">確認收款</a>
+          <a href="/admin_order?methods=delete&oid={{ item._id }}">刪除訂單</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

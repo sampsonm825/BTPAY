@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>訂單查詢</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      font-weight: bold;
+      padding: 30px 0;
+    }
+    .order ul {
+      list-style: none;
+    }
+    .order ul li{
+      border: 1px solid #000;
+      width: 300px;
+      padding: 15px;
+      margin: 0 auto;
+      margin-bottom: 20px;
+    }
+    .order ul p {
+      padding: 10px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>歷史訂單</h1>
+  <div class="order">
+    <ul>
+      {% for item in order_data %}
+      <li>
+        <p>產品名稱: <span>{{ item.product[0].name }}</span></p>
+        <p>購買金額: <span>{{ item.product[0].price }}</span></p>
+        <p>公司: <span>{{ item.product[0].factory_name }}</span></p>
+        <p>帳戶: <span>{{ item.product[0].factory_bank }}</span></p>
+        <p>付款狀態: 
+          <span>
+            {% if item.is_paid == true %}
+              已付款
+            {% else %}
+              未付款
+            {% endif %}
+          </span>
+        </p>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+</body>
+</html>

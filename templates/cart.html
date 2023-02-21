@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>購物專區</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+
+    h1, h2 {
+      font-size: 32px;
+      font-weight: bold;
+      text-align: center;
+      padding: 30px 0;
+    }
+    .product-list {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 2%;
+    }
+    
+    a {
+      text-decoration: none;
+      color: #fff;
+      display: block;
+      width: 100%;
+      text-align: center;
+      font-weight: 400;
+      padding: 8px 15px;
+      background-color: rgb(43, 47, 152);
+      cursor: pointer;
+    }
+    a.delete {
+      background-color: rgb(136, 9, 9);
+    }
+    .item {
+      width: 23%;
+      border: 1px solid #000;
+      margin-bottom: 30px;
+    }
+    .item .title {
+      border-bottom: 1px solid #000;
+      padding: 4px 0;
+      text-align: center;
+    }
+    .item .desc {
+      height: 200px;
+      padding: 10px;
+    }
+    .item .price {
+      padding: 10px;
+    }
+    .buy-cart {
+      margin-bottom: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #000;
+    }
+    th, td {
+      border-top: 1px solid #000;
+      padding: 15px 0;
+      width: 20%;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="cart">
+      <div class="wrap">
+        <h1>購物專區 ({{ session.name }})</h1>
+        <div class="product-list">
+          {% for item in product_data %}
+          <div class="item" data-id="{{ item._id }}">
+            <div class="title">{{ item.name }}</div>
+            <div class="desc">{{ item.desc }}</div>
+            <div class="price">價格：{{ item.price }}</div>
+            <a href="/cart/{{ item._id }}">購買</a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+</body>
+</html>
