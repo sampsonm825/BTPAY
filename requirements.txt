@@ -1,0 +1,7 @@
+Flask==2.2.2
+openai
+flask_cors
+pyotp
+qrcode
+pymongo
+datetime
