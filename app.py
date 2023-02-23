@@ -365,6 +365,14 @@ def admin_dashboard():
     else:
         return redirect('admin_login')
 
+@app.route('/order_list')
+def order_list():
+    if 'id' in session:
+        return render_template('order_custom.html')
+    else:
+        return redirect('login')
+
+
 @app.route('/order')
 def order():
     if 'id' in session:
@@ -532,6 +540,39 @@ def admin_product():
     else:
         return redirect('admin_login')
 
+@app.route('/order_prove',methods=['POST'])
+def order_prove():
+    if'id' in session:
+        oId = request.form['oId']
+        f = request.files['prove_img']
+        mid = session['id']
+        member_data = dbs.member.find_one({ '_id':ObjectId(mid) })
+        account = member_data['account']
+        imgUrl = ''
+
+        if f and allowed_file(f.filename):
+            file_path = basedir + '\public\image' + f'\{account}'
+            if not os.path.isdir(file_path):
+                os.mkdir(file_path)
+            f.save(os.path.join(file_path, f.filename))
+            imgUrl = f'/image/{account}/{f.filename}'
+
+        dbs.order.update_one(
+            {
+                '_id':ObjectId(oId)
+            },
+            {
+                '$set':{
+                    'prove_img': imgUrl
+                }
+            }
+        )
+ 
+
+        return redirect('order')
+    else:
+        return redirect('login')
+
 @app.route('/profile', methods=['GET','POST'])
 def profile():
     if 'id' in session:
@@ -619,5 +660,5 @@ def register():
     else:
         return render_template('register.html')
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
 

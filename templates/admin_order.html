@@ -130,6 +130,7 @@
         <th>產品</th>
         <th>產品公司</th>
         <th>公司帳戶</th>
+        <th>付款證明</th>
         <th>狀態</th>
         <th>功能</th>
       </tr>
@@ -142,6 +143,13 @@
         <td>{{ item.product[0].name }}</td>
         <td>{{ item.product[0].factory_name }}</td>
         <td>{{ item.product[0].factory_bank }}</td>
+        <td>
+          {% if item.prove_img != '' %}
+          <img src="{{ item.prove_img }}" alt="">
+          {% else %}
+          未上傳證明
+          {% endif %}
+        </td>
 
         <td>
           {% if item.is_paid == true %}
