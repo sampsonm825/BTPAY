@@ -197,7 +197,7 @@
 
     .order-modal .header {
         height: 50px;
-        background-color: rgb(58, 58, 187);
+        background-color: rgb(253, 224, 3);
         display: flex;
         align-items: center;
         padding: 0 10px;
@@ -206,14 +206,14 @@
 
     .order-modal .header span {
         font-size: 24px;
-        color: white;
+        color: rgb(0, 0, 0);
         width: 30px;
         cursor: pointer;
     }
 
     .order-modal .header p {
         font-size: 20px;
-        color: white;
+        color: rgb(0, 0, 0);
         padding-right: 30px;
         text-align: center;
         flex: 1 0 auto;
@@ -263,15 +263,15 @@
     }
 
     .order-modal .step-item.active p:before {
-        background-color: rgb(125, 195, 125);
+        background-color: rgb(34, 119, 34);
     }
 
     .order-modal .step-item.active p:after {
-        background-color: rgb(125, 195, 125);
+        background-color: rgb(34, 119, 34);
     }
 
     .order-modal .step-item.active p {
-        color: rgb(125, 195, 125);
+        color: rgb(34, 119, 34);
     }
 
     .c_data {
@@ -310,7 +310,7 @@
     }
 
     .product .price-qty {
-        width: 15%;
+        width: 20%;
         text-align: right;
         font-size: 18px;
         letter-spacing: 2px;
@@ -357,7 +357,7 @@
         text-align: center;
         text-decoration: none;
         display: block;
-        width: 100px;
+        width: 150px;
         border-radius: 20px;
         color: #fff;
         padding: 5px 8px;
@@ -433,32 +433,32 @@
             <span @click="modalControl(false), temp_orderList = {}">
                 <i class="fa-solid fa-arrow-left"></i>
             </span>
-            <p>商家版訂單詳情</p>
+            <p><b>订单详情</b></p>
         </div>
         <div class="step">
             <div class="step-item active" :class="{'active': temp_orderList.pay_flow >= 0}">
                 <p>已付款</p>
             </div>
-            <div class="step-item" :class="{'active': temp_orderList.pay_flow >= 1}">
-                <p>待發貨</p>
+            <div class="step-item" :class="{'active': temp_orderList.pay_flow >= 0}">
+                <p>待发货</p>
             </div>
-            <div class="step-item" :class="{'active': temp_orderList.pay_flow >= 2}">
-                <p>待收貨</p>
+            <div class="step-item" :class="{'active': temp_orderList.pay_flow >= 0}">
+                <p>待收货</p>
             </div>
             <div class="step-item" :class="{'active': temp_orderList.pay_flow >= 3}">
-                <p>待評價</p>
+                <p>待评价</p>
             </div>
-            <div class="step-item" :class="{'active': temp_orderList.pay_flow >= 4}">
+            <div class="step-item" :class="{'active': temp_orderList.pay_flow >= 5}">
                 <p>已完成</p>
             </div>
         </div>
         <div class="c_data">
             <div class="c_data-item">
-                <p>收件人: [[ temp_orderList.c_name ]]</p>
-                <p>手機號: [[ temp_orderList.phone_number ]]</p>
+                <p>收件人： [[ temp_orderList.c_name ]]</p>
+                <p>手机号： [[ temp_orderList.phone_number ]]</p>
             </div>
             <div class="c_data-item">
-                <p>[[ temp_orderList.address ]]</p>
+                <p>买家收件地址: [[ temp_orderList.address ]]</p>
             </div>
         </div>
         <div class="product">
@@ -469,38 +469,44 @@
                 <p>[[ temp_orderList.p_name ]]</p>
             </div>
             <div class="price-qty">
-                <p>$[[ temp_orderList.p_price ]]</p>
-                <p>x[[ temp_orderList.p_qty ]]</p>
+                <p>  ¥[[ temp_orderList.p_price ]].00</p>
+                <p>x1 </p>
+                <p>= ¥[[ temp_orderList.p_price ]].00</p>
+                <p>运费 ¥0.00</p>
             </div>
         </div>
         <div class="order-profile">
-            <h1>訂單信息</h1>
+            <h1><b>订单信息</b></h1>
             <p>
-                <span>訂單編號:</span>
+                <span>订单编号：</span>
                 <span>[[ temp_orderList.pay_no ]]</span>
             </p>
             <p>
-                <span>下單時間:</span>
+                <span>下单时间：</span>
                 <span>[[ temp_orderList.pay_time ]]</span>
             </p>
             <p>
-                <span>訂單類型:</span>
-                <span>普通訂單</span>
+                <span>订单类型：</span>
+                <span>普通订单</span>
             </p>
             <p>
-                <span>付款人姓名:</span>
+                <span>买家姓名：</span>
                 <span>[[ temp_orderList.pay_name ]]</span>
             </p>
             <p>
-                <span>支付狀態:</span>
+                <span>付款总金额：</span>
+                <span>¥ [[ temp_orderList.p_price ]].00</span>
+            </p>
+            <p>
+                <span>支付状态：</span>
                 <span>[[ temp_orderList.status == 0 ? '已支付' : '已支付' ]]</span>
             </p>
             <p>
                 <span>支付方式:</span>
-                <span>[[ temp_orderList.pay_method == 0 ? '銀行卡轉帳' : '銀行卡轉帳' ]]</span>
+                <span>[[ temp_orderList.pay_method == 0 ? '银行卡转账' : '银行卡转账' ]]</span>
             </p>
         </div>
-        <a href="#" class="order-btn">確認收款</a>
+        <a href="#" class="order-btn">订单完成</a>
     </div>
 </div>
 
