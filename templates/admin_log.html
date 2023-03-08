@@ -1,0 +1,144 @@
+{% extends "admin_base.html" %}
+
+{% block title %}後台-訂單管理{% endblock %}
+
+{% block style %}
+<style>
+  * {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  h1 {
+    font-weight: bold;
+    font-size: 32px;
+    text-align: center;
+    letter-spacing: 3px;
+    margin: 30px 0;
+  }
+
+  .verify {
+    margin-top: 30px;
+    padding: 0 30px;
+  }
+
+  a {
+    width: 20%;
+  }
+
+  table {
+    width: 100%;
+    padding: 0 60px;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: 1px solid #000;
+    margin: 0 auto;
+  }
+
+  th,
+  td {
+    border: 1px solid #000;
+    width: calc(100% / 4);
+    padding: 8px;
+    text-align: center;
+  }
+
+  table img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  a {
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    padding: 6px 0;
+  }
+
+  .edit-modal {
+    position: absolute;
+    width: 40%;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 15px;
+    background-color: #fff;
+    border: 2px solid #000;
+    opacity: 1;
+    z-index: 99;
+  }
+
+  form {
+    width: 80%;
+    margin: 0 auto;
+    padding: 10px;
+  }
+
+  .form-control {
+    margin-bottom: 15px;
+  }
+
+  .form-control input {
+    width: 100%;
+    padding: 8px 10px;
+  }
+
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  button {
+    padding: 4px 6px;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  button.close {
+    background-color: rgb(141, 33, 33);
+  }
+
+  button[type="submit"] {
+    background-color: rgb(60, 60, 122);
+  }
+
+  h2 {
+    text-align: center;
+  }
+</style>
+{% endblock %}
+
+{% block main %}
+<h1>收支紀錄</h1>
+<div class="verify">
+  <table>
+    <thead>
+      <tr>
+        <th>紀錄姓名:</th>
+        <th>紀錄訂單編號:</th>
+        <th>支出代幣</th>
+        <th>收入代幣</th>
+        <th>支出红利</th>
+        <th>收入红利</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in record_data %}
+      <tr>
+        <td>{{ item.m_name }}</td>
+        <td>{{ item.oId }}</td>
+        <td>{{ item.out_coin }}</td>
+        <td>{{ item.in_coin }}</td>
+        <td>{{ item.out_bonus }}</td>
+        <td>{{ item.in_bonus }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

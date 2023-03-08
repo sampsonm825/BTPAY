@@ -37,6 +37,16 @@
       display: flex;
       justify-content: space-between;
     }
+    a {
+      text-decoration: none;
+      color: #fff;
+      background-color: rgb(102, 143, 102);
+      padding: 4px 12px;
+      text-align: center;
+      border-radius: 8px;
+      margin-top: 10px;
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -59,6 +69,15 @@
             {% endif %}
           </span>
         </p>
+        <p>订单狀態: 
+          <span>
+            {% if item.status == true %}
+              已完成
+            {% else %}
+              未完成
+            {% endif %}
+          </span>
+        </p>
         {% if item.prove_img == '' %}
         <form action="/order_prove" method="POST"  enctype="multipart/form-data">
           <input type="hidden" name="oId" value="{{ item._id}}">
@@ -66,7 +85,16 @@
           <button type="submit">上傳圖片證明</button>          
         </form>
         {% else %}
-        <p>以上傳證明-等待通知</p>
+          {% if item.is_paid == false %}
+            <p>以上傳證明-等待通知</p>
+          {% else %}
+            {% if item.status != true %}
+              <a href="/order?method=success&oId={{ item._id }}&pId={{ item.product[0]._id }}">
+              已確認收到廠商款項
+            </a>
+            {% endif %}
+          {% endif %}
+          
         {% endif %}
       </li>
       {% endfor %}

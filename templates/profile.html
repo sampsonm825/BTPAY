@@ -91,6 +91,21 @@
       margin-right: 0;
       margin-left: auto;
     }
+    .order_control_btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      color: #fff;
+      background-color: #5d9cec;
+      font-size: 20px;
+      border-radius: 20px;
+      padding: 6px 0;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .order_control_btn.doing {
+      background-color: rgb(87, 149, 87);
+    }
   </style>
 </head>
 
@@ -107,7 +122,9 @@
       </div>
     </div>
     <div class="coin">
-      <p>剩餘代幣: {{ member_data.coin }}</p>
+      <p>代币上限: {{ member_data.coin }}</p>
+      <p>持有代币: {{ member_data.real_coin }}</p>
+      <p>持有红利: {{ member_data.bonus }}</p>
     </div>
     <div class="logout">
       <a href="#">登出</a>
@@ -123,6 +140,13 @@
     </div>
     <div class="cart">
       <a href="/resetPassword">修改密码</a>
+    </div>
+    <div>
+      {% if member_data.status == false %}
+        <a class="order_control_btn" href="/profile?status=1&method=controlStatus">開始接單</a>
+      {% else %}
+        <a class="order_control_btn doing" href="/profile?status=0&method=controlStatus">正在接單...</a>
+      {% endif %}
     </div>
   </div>
   <script>

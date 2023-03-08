@@ -1,0 +1,589 @@
+{% extends "admin_base.html" %}
+
+{% block title %}後台-訂單管理{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" class="css">
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    h1 {
+        font-weight: bold;
+        font-size: 32px;
+        text-align: center;
+        letter-spacing: 3px;
+        margin: 30px 0;
+    }
+
+    .verify {
+        margin-top: 30px;
+        padding: 0 30px;
+    }
+
+    a {
+        width: 20%;
+    }
+
+    table {
+        width: 100%;
+        padding: 0 60px;
+        border-collapse: collapse;
+        border-spacing: 0;
+        border: 1px solid #000;
+        margin: 0 auto;
+    }
+
+    th,
+    td {
+        border: 1px solid #000;
+        width: calc(100% / 9);
+        padding: 8px;
+        text-align: center;
+    }
+
+    table img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    a {
+        text-decoration: none;
+        display: block;
+        width: 100%;
+        white-space: nowrap;
+        padding: 6px 0;
+    }
+
+    .edit-modal {
+        position: absolute;
+        width: 40%;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 15px;
+        background-color: #fff;
+        border: 2px solid #000;
+        opacity: 1;
+        z-index: 99;
+    }
+
+    form {
+        width: 80%;
+        margin: 0 auto;
+        padding: 10px;
+    }
+
+    .form-control {
+        margin-bottom: 15px;
+    }
+
+    .form-control input {
+        width: 100%;
+        padding: 8px 10px;
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    button {
+        padding: 4px 6px;
+        color: white;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    button.close {
+        background-color: rgb(141, 33, 33);
+    }
+
+    button[type="submit"] {
+        background-color: rgb(60, 60, 122);
+    }
+
+    h2 {
+        text-align: center;
+    }
+
+    .is_paid {
+        color: green
+    }
+
+    .no_paid {
+        color: red
+    }
+
+    .step-1 {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        margin-bottom: 30px;
+        justify-content: center;
+        gap: 40px;
+    }
+
+    .step-1-item {
+        display: flex;
+        gap: 20px;
+        font-size: 20px;
+    }
+
+    .step-1-item input {
+        text-align: center;
+    }
+
+    .step-1-btn a,
+    .clear_btn a {
+        display: block;
+        text-decoration: none;
+        color: #fff;
+        padding: 6px 12px;
+        font-size: 18px;
+        text-align: center;
+        background-color: rgb(84, 84, 154);
+        margin: 0 !important;
+        cursor: pointer;
+    }
+
+    .clear_btn {
+        margin-bottom: 30px;
+    }
+
+    .step-2 {
+        display: flex;
+        gap: 2%;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .step-2 .temp_list_input {
+        width: 31.3333%;
+        margin-bottom: 12px;
+    }
+
+    .step-2 .temp_list_input input {
+        margin-bottom: 10px;
+    }
+
+
+    .order-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        height: 100vh;
+        background-color: rgb(237, 235, 235);
+        z-index: 100;
+        width: 576px;
+    }
+
+    .mask {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: #000;
+        opacity: .6;
+        z-index: 10;
+        top: 0;
+        left: 0;
+    }
+
+    .order-modal .header {
+        height: 50px;
+        background-color: rgb(58, 58, 187);
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+
+    }
+
+    .order-modal .header span {
+        font-size: 24px;
+        color: white;
+        width: 30px;
+        cursor: pointer;
+    }
+
+    .order-modal .header p {
+        font-size: 20px;
+        color: white;
+        padding-right: 30px;
+        text-align: center;
+        flex: 1 0 auto;
+    }
+
+    .step {
+        display: flex;
+        padding: 20px 20px;
+        align-items: center;
+    }
+
+    .step-item {
+        width: calc(100% / 5);
+    }
+
+    .step-item p {
+        text-align: center;
+        position: relative;
+    }
+
+    .step-item p:after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        background-color: #000;
+        height: 1px;
+        left: -50%;
+        bottom: -10px;
+    }
+
+    .step-item p:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -15px;
+        width: 10px;
+        height: 10px;
+        background-color: #000;
+        border-radius: 50%;
+        margin: auto;
+        z-index: 10;
+    }
+
+    .order-modal .step-item:first-child p:after {
+        width: 0;
+    }
+
+    .order-modal .step-item.active p:before {
+        background-color: rgb(125, 195, 125);
+    }
+
+    .order-modal .step-item.active p:after {
+        background-color: rgb(125, 195, 125);
+    }
+
+    .order-modal .step-item.active p {
+        color: rgb(125, 195, 125);
+    }
+
+    .c_data {
+        padding: 0px 40px;
+        margin-top: 40px;
+    }
+
+    .c_data .c_data-item {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        margin-bottom: 20px;
+    }
+
+    hr {
+        margin: 20px 0;
+        display: block;
+    }
+
+    .product {
+        display: flex;
+        background-color: #fff;
+        /* align-items: center; */
+        padding: 20px 10px;
+        gap: 3%;
+        margin-bottom: 20px;
+    }
+
+    .product .img {
+        width: 15%;
+    }
+
+    .product .name {
+        width: 67%;
+        font-size: 18px;
+    }
+
+    .product .price-qty {
+        width: 15%;
+        text-align: right;
+        font-size: 18px;
+        letter-spacing: 2px;
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 10px;
+    }
+
+    .product .price-qty p:last-child {
+        margin-top: auto;
+        margin-bottom: 0;
+    }
+
+    img {
+        display: block;
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
+    .order-profile {
+        background-color: #e2dbdb;
+    }
+
+    .order-profile h1 {
+        font-weight: 400;
+        font-size: 24px;
+        text-align: left;
+        border-top: 1px solid rgb(180, 174, 174);
+        border-bottom: 1px solid rgb(180, 174, 174);
+        padding: 10px 15px;
+        margin: 0;
+    }
+
+    .order-profile p {
+        padding: 10px 15px;
+        border-bottom: 1px solid rgb(180, 174, 174);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .order-btn {
+        text-align: center;
+        text-decoration: none;
+        display: block;
+        width: 100px;
+        border-radius: 20px;
+        color: #fff;
+        padding: 5px 8px;
+        margin-top: 20px;
+        background-color: rgb(200, 102, 102);
+        margin-left: auto;
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<h1>訂單管理</h1>
+<div id="app">
+    <div class="mask" v-if="is_modal"></div>
+    <div class="verify">
+        <div class="clear_btn" v-if="order_list.length > 0">
+            <a herf="javascript:;" @click="clear">重新設置</a>
+        </div>
+        <table v-if="order_list.length != 0">
+            <thead>
+                <tr>
+                    <th>訂单编号</th>
+                    <th>訂購人</th>
+                    <th>產品名称</th>
+                    <th>价格</th>
+                    <th>下单时间</th>
+                    <th>付款状态</th>
+                    <th>功能</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="item in order_list">
+                    <td>[[ item.pay_no ]]</td>
+                    <td>[[ item.c_name ]]</td>
+                    <td>[[ item.p_name ]]</td>
+                    <td>[[ item.p_price ]]</td>
+                    <td>[[ item.pay_time ]]</td>
+                    <td>[[ item.pay_method == 0 ? '未支付' : '已支付' ]]</td>
+                    <td>
+                        <a href="javascript:;" @click="modalControl(true), temp_orderList = {...item}">觀看訂單</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="selector" v-else>
+            <div class="step-1">
+                <div class="step-1-item">
+                    <p>想要產生</p>
+                    <input type="number" min="1" max="100" v-model="input_value" @change="tempListControl(input_value)">
+                    <p>筆訂單</p>
+                </div>
+                <div class="step-1-btn" v-if="temp_list.length > 0">
+                    <a herf="javascript:;" @click="getData">產生訂單</a>
+                </div>
+            </div>
+            <div class="step-2" v-if="temp_list.length > 0">
+                <div class="temp_list_input" v-for="(item, index) in temp_list">
+                    <p>訂單[[ index + 1 ]]</p>
+                    <div class="form-control">
+                        <input type="text" placeholder="請輸入圖片網址" v-model="item.p_img">
+                        <input type="text" placeholder="請輸入產品名稱" v-model="item.p_name">
+                        <input type="number" placeholder="請輸入總金額" min="0" v-model="item.p_price">
+                        <input type="text" placeholder="請輸入訂單日期" v-model="item.pay_time">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="order-modal" v-if="is_modal">
+        <div class="header">
+            <span @click="modalControl(false), temp_orderList = {}">
+                <i class="fa-solid fa-arrow-left"></i>
+            </span>
+            <p>商家版訂單詳情</p>
+        </div>
+        <div class="step">
+            <div class="step-item active" :class="{'active': temp_orderList.pay_flow >= 0}">
+                <p>已付款</p>
+            </div>
+            <div class="step-item" :class="{'active': temp_orderList.pay_flow >= 1}">
+                <p>待發貨</p>
+            </div>
+            <div class="step-item" :class="{'active': temp_orderList.pay_flow >= 2}">
+                <p>待收貨</p>
+            </div>
+            <div class="step-item" :class="{'active': temp_orderList.pay_flow >= 3}">
+                <p>待評價</p>
+            </div>
+            <div class="step-item" :class="{'active': temp_orderList.pay_flow >= 4}">
+                <p>已完成</p>
+            </div>
+        </div>
+        <div class="c_data">
+            <div class="c_data-item">
+                <p>收件人: [[ temp_orderList.c_name ]]</p>
+                <p>手機號: [[ temp_orderList.phone_number ]]</p>
+            </div>
+            <div class="c_data-item">
+                <p>[[ temp_orderList.address ]]</p>
+            </div>
+        </div>
+        <div class="product">
+            <div class="img">
+                <img :src="temp_orderList.p_img" alt="">
+            </div>
+            <div class="name">
+                <p>[[ temp_orderList.p_name ]]</p>
+            </div>
+            <div class="price-qty">
+                <p>$[[ temp_orderList.p_price ]]</p>
+                <p>x[[ temp_orderList.p_qty ]]</p>
+            </div>
+        </div>
+        <div class="order-profile">
+            <h1>訂單信息</h1>
+            <p>
+                <span>訂單編號:</span>
+                <span>[[ temp_orderList.pay_no ]]</span>
+            </p>
+            <p>
+                <span>下單時間:</span>
+                <span>[[ temp_orderList.pay_time ]]</span>
+            </p>
+            <p>
+                <span>訂單類型:</span>
+                <span>普通訂單</span>
+            </p>
+            <p>
+                <span>付款人姓名:</span>
+                <span>[[ temp_orderList.pay_name ]]</span>
+            </p>
+            <p>
+                <span>支付狀態:</span>
+                <span>[[ temp_orderList.status == 0 ? '已支付' : '已支付' ]]</span>
+            </p>
+            <p>
+                <span>支付方式:</span>
+                <span>[[ temp_orderList.pay_method == 0 ? '銀行卡轉帳' : '銀行卡轉帳' ]]</span>
+            </p>
+        </div>
+        <a href="#" class="order-btn">確認收款</a>
+    </div>
+</div>
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.4/axios.min.js'></script>
+<script src="https://unpkg.com/vue@next"></script>
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                order_list: [],
+                is_modal: false,
+                temp_list: [],
+                input_value: 0,
+                temp_orderList: {}
+
+            }
+        },
+        methods: {
+            modalControl(type) {
+                this.is_modal = type
+            },
+            clear() {
+                this.order_list = []
+                this.temp_list = []
+                this.input_value = 0
+                this.temp_orderList = {}
+            },
+            check_list() {
+                flag = true
+                for (let i = 0; i < this.temp_list.length; i++) {
+                    if (this.temp_list[i].p_name == '' || this.temp_list[i].p_img == '' || this.temp_list[i].p_price == 0 || this.temp_list[i].pay_time == '') {
+                        flag = false
+                    }
+                }
+                return flag
+            },
+            tempListControl(count) {
+                let len = this.temp_list.length
+                for (let i = 0; i < count - len; i++) {
+                    this.temp_list.push({
+                        p_name: '',
+                        p_price: 0,
+                        p_img: '',
+                        pay_time: ''
+                    })
+                }
+            },
+            getData() {
+                if (this.check_list()) {
+                    axios.get(`/api/fake_data?count=${this.input_value}`)
+                        .then(res => {
+                            res.data.forEach((item, index) => {
+                                let data = {
+                                    c_name: item.name,
+                                    address: item.address,
+                                    phone_number: item.phone,
+                                    p_name: this.temp_list[index].p_name,
+                                    p_price: this.temp_list[index].p_price,
+                                    p_img: this.temp_list[index].p_img,
+                                    pay_time: this.temp_list[index].pay_time,
+                                    p_qty: 1,
+                                    pay_no: Math.random().toString().slice(-9),
+                                    pay_name: item.name,
+                                    pay_flow: Math.floor(Math.random() * 5),
+                                    pay_method: Math.floor(Math.random() * 2),
+                                    status: Math.floor(Math.random() * 2)
+                                }
+                                this.order_list.push(data)
+                            })
+                        })
+                        .catch(err => {
+                            console.log(err)
+                        })
+                } else {
+                    alert('請確認所有輸入框都填入字串')
+                }
+            }
+        },
+        compilerOptions: {
+            delimiters: ["[[", "]]"]
+        },
+
+    })
+    app.mount('#app')     
+</script>
+{% endblock %}
